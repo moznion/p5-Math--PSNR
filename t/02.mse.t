@@ -28,9 +28,9 @@ subtest 'Calc MSE about the same array' => sub {
 subtest 'Calc MSE about the different array' => sub {
     $psnr->x( [ 1.1, 2.2, 3.3, 4.4, 5.5 ] );
     $psnr->y( [ 9.9, 8.8, 7.7, 6.6, 5.5 ] );
-    $expect = 5.808;
+    $expect = 29.04;
     $got = $psnr->mse;
-    is( sprintf( "%.3f", $got ), sprintf( "%.3f", $expect ) );
+    is( sprintf( "%.2f", $got ), sprintf( "%.2f", $expect ) );
 };
 
 subtest 'Calc MSE between defferent length arrays' => sub {

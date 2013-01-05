@@ -20,7 +20,7 @@ my $psnr = new Math::PSNR(
 );
 
 subtest 'Calc PSNR - 1' => sub {
-    $expect = 40.49053753;
+    $expect = 33.50083748;
     $got    = $psnr->psnr;
     is( sprintf( "%.7f", $got ), sprintf( "%.7f", $expect ) );
 };

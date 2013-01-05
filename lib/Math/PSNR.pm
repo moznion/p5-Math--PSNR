@@ -32,7 +32,7 @@ sub _sqr {
     return $var * $var;
 }
 
-sub _common_log {
+sub _log10 {
     my $var = shift;
 
     return log($var) / log(10);
@@ -48,13 +48,13 @@ sub mse {
     my ($self) = @_;
 
     unless ( $#{ $self->x } == $#{ $self->y } ) {
-        croak "$!";    # TODO fill an error message.
+        croak "Length of given signals are different.";
     }
 
     my $sum = 0;
     $sum += _sqr( $self->x->[$_] - $self->y->[$_] ) for ( 0 .. $#{ $self->x } );
 
-    return $sum / scalar @{ $self->x } * scalar @{ $self->y };
+    return $sum / scalar @{ $self->x };
 }
 
 sub psnr {
@@ -68,7 +68,7 @@ sub psnr {
 
     my $max_power = $self->_get_max_power;
 
-    return 20 * _common_log( $max_power / sqrt($mse) );
+    return 20 * _log10( $max_power / sqrt($mse) );
 }
 
 1;
