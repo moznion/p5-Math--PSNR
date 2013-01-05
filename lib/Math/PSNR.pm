@@ -4,34 +4,77 @@ use warnings;
 use strict;
 use Carp;
 use Exporter;
+use Mouse;
 
-use vars qw/$VERSION @ISA @EXPORT_OK/;
+our $VERSION = '0.01';
 
-BEGIN {
-    $VERSION   = '0.01';
-    @ISA       = qw/Exporter/;
-    @EXPORT_OK = qw/mse/;           #TODO write here
-}
+has bpp => (
+    is       => 'rw',
+    isa      => 'Int',
+    default  => '8',
+);
+
+has x => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    required => '1',
+);
+
+has y => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    required => '1',
+);
 
 sub _sqr {
     my $var = shift;
+
     return $var * $var;
 }
 
-sub mse {
-    my ( $x, $y ) = @_;
+sub _common_log {
+    my $var = shift;
 
-    unless ( $#$x == $#$y ) {
-        croak "$!"; # TODO fill an error message.
+    return log($var) / log(10);
+}
+
+sub _get_max_power {
+    my $self = shift;
+
+    return 2**$self->bpp - 1;
+}
+
+sub mse {
+    my ($self) = @_;
+
+    unless ( $#{ $self->x } == $#{ $self->y } ) {
+        croak "$!";    # TODO fill an error message.
     }
 
     my $sum = 0;
-    $sum += _sqr($x->[$_] - $y->[$_]) for (0 .. $#$x);
-    return $sum / scalar @$x * scalar @$y;
+    $sum += _sqr( $self->x->[$_] - $self->y->[$_] ) for ( 0 .. $#{ $self->x } );
+
+    return $sum / scalar @{ $self->x } * scalar @{ $self->y };
+}
+
+sub psnr {
+    my ( $self ) = @_;
+
+    my $mse = $self->mse;
+    if ($mse == 0) {
+        carp 'Given signals are the same.';
+        return 'same';
+    }
+
+    my $max_power = $self->_get_max_power;
+
+    return 20 * _common_log( $max_power / sqrt($mse) );
 }
 
 1;
 __END__
+
+=encoding utf8
 
 =head1 NAME
 
