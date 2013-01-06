@@ -1,212 +1,12 @@
-package Math::PSNR;
-
-use warnings;
-use strict;
-use Carp;
-use Exporter;
-use Mouse;
-
-our $VERSION = '0.01';
-
-has bpp => (
-    is      => 'rw',
-    isa     => 'Int',
-    default => '8',
-    trigger => sub {
-        my ($self) = @_;
-        $self->_set_max_power( $self->_calc_max_power );
-    },
-);
-
-has x => (
-    is       => 'rw',
-    isa      => 'ArrayRef|HashRef',
-    required => '1',
-);
-
-has y => (
-    is       => 'rw',
-    isa      => 'ArrayRef|HashRef',
-    required => '1',
-);
-
-has max_power => (
-    is       => 'ro',
-    isa      => 'Int',
-    writer   => '_set_max_power',
-    init_arg => undef,
-    lazy     => '1',
-    default  => sub {
-        my ($self) = @_;
-        return $self->_calc_max_power;
-    },
-);
-
-no Mouse;
-
-sub _sqr {
-    my $var = shift;
-    return $var * $var;
-}
-
-sub _log10 {
-    my $var = shift;
-    return log($var) / log(10);
-}
-
-sub _calc_max_power {
-    my $self = shift;
-    return 2**$self->bpp - 1;
-}
-
-sub _limit {
-    my ($self, $var) = @_;
-
-    if ($var < 0) {
-        return 0;
-    } elsif ($var > $self->max_power) {
-        return $self->max_power;
-    }
-    return $var;
-}
-
-sub _square_remainder {
-    my ( $self, $x, $y ) = @_;
-
-    $x = $self->_limit($x);
-    $y = $self->_limit($y);
-
-    return _sqr( $x - $y );
-}
-
-sub _calc_psnr {
-    my ( $self, $mse ) = @_;
-    return 20 * _log10( $self->max_power / sqrt($mse) );
-}
-
-sub _check_exist_key {
-    my ($self, $key) = @_;
-
-    unless ( exists $self->x->{$key} && exists $self->y->{$key} ) {
-        croak "Signal hash must have key of '$key'.";
-    }
-
-    unless ( ref $self->x->{$key} eq 'ARRAY'
-        && ref $self->y->{$key} eq 'ARRAY' )
-    {
-        croak "Value of '$key' must be array reference. ";
-    }
-}
-
-sub _check_exist_rgb_keys {
-    my ($self) = @_;
-
-    $self->_check_exist_key('r');
-    $self->_check_exist_key('g');
-    $self->_check_exist_key('b');
-}
-
-sub _check_signal_length_each {
-    my ($self) = @_;
-
-    my $signal_length_x = $#{ $self->x->{'r'} };
-    unless ( $signal_length_x == $#{ $self->x->{'g'} } && $signal_length_x == $#{ $self->x->{'b'} } ) {
-        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal x.";
-    }
-
-    my $signal_length_y = $#{ $self->y->{'r'} };
-    unless ( $signal_length_y == $#{ $self->y->{'g'} } && $signal_length_y == $#{ $self->y->{'b'} } ) {
-        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal y.";
-    }
-
-    unless ( $signal_length_x == $signal_length_y ) {
-        croak "Signal length are different between 'Signal x' and 'Signal y'.";
-    }
-}
-
-sub mse {
-    my ($self) = @_;
-
-    unless ( ref $self->x eq 'ARRAY' && ref $self->y eq 'ARRAY') {
-        croak 'Signals must be array reference.';
-    }
-
-    my $signal_length = scalar @{ $self->x };
-    unless ( $signal_length == scalar @{ $self->y } ) {
-        croak 'Signals must be the same length.';
-    }
-
-    my ( $x, $y ) = ( $self->x, $self->y );
-    my $sum = 0;
-    for ( 0 .. $signal_length - 1 ) {
-        $sum += $self->_square_remainder( $x->[$_], $y->[$_] );
-    }
-
-    return $sum / $signal_length;
-}
-
-sub psnr {
-    my ($self) = @_;
-
-    my $mse = $self->mse;
-    if ( $mse == 0 ) {
-        carp 'Given signals are the same.';
-        return 'same';
-    }
-
-    return $self->_calc_psnr($mse);
-}
-
-sub mse_rgb {
-    my ($self) = @_;
-
-    unless ( ref $self->x eq 'HASH' && ref $self->y eq 'HASH' ) {
-        croak 'Signals must be hash refference.';
-    }
-
-    $self->_check_exist_rgb_keys;
-    $self->_check_signal_length_each;
-
-    my $signal_length = scalar @{ $self->x->{'r'} };
-
-    my ( $x, $y ) = ( $self->x, $self->y );
-    my $sum = 0;
-    for ( 0 .. $signal_length - 1 ) {
-        $sum +=
-          $self->_square_remainder( $x->{'r'}->[$_], $y->{'r'}->[$_] ) +
-          $self->_square_remainder( $x->{'g'}->[$_], $y->{'g'}->[$_] ) +
-          $self->_square_remainder( $x->{'b'}->[$_], $y->{'b'}->[$_] );
-    }
-    return $sum / (3 * $signal_length);
-}
-
-sub psnr_rgb {
-    my ($self) = @_;
-
-    my $mse = $self->mse_rgb;
-
-    if ( $mse == 0 ) {
-        carp 'Given signals are the same.';
-        return 'same';
-    }
-
-    return $self->_calc_psnr($mse);
-}
-
-1;
-__END__
-
 =encoding utf8
 
 =head1 NAME
 
 Math::PSNR - Calculate the PSNR (Peak Signal-to-Noise Ratio) and MSE (Mean Square Error).
 
-
 =head1 VERSION
 
 This document describes Math::PSNR version 0.01
-
 
 =head1 SYNOPSIS
 
@@ -247,7 +47,6 @@ This document describes Math::PSNR version 0.01
     # Calculate PSNR of RGB signal
     $psnr->psnr_rgb;
 
-
 =head1 DESCRIPTION
 
 This module calculates PSNR (Peak Signal-to-Noise Ration) and MSE (Mean Square Error).
@@ -262,95 +61,93 @@ three components signal (e.g. color (RGB) image).
 
 Math::PSNR requires no configuration files or environment variables.
 
-
 =head1 INTERFACES
 
 =head2 C<< Math::PSNR->new( bpp => $bpp, x => $x, y => $y ) >>
 
 Creates a instance. Attributes are as follows:
 
-=head3 C<< bpp >>
+=head3 C<bpp>
 
 Specify the bpp (bit per pixel). It set I<2^(bpp) - 1> to maximum power.
 
-=over
+=over 4
 
-=item C<< is : rw >>
+=item C<is : rw>
 
 This attribute is rewritable. Default accessor to this attribute is provided.
 
-=item C<< isa : Int >>
+=item C<isa : Int>
 
-=item C<< default : 8 >>
+=item C<default : 8>
 
 This attribute has default value. If I<bpp> is not set, it will be set 8 (bit).
 
-=item C<< required : 0 >>
+=item C<required : 0>
 
 This attribute is not required.
 
 =back
 
-=head3 C<< x >>
+=head3 C<x>
 
 The target of signal one side to calculate PSNR or MSE.
 
-=over
+=over 4
 
-=item C<< is : rw >>
+=item C<is : rw>
 
 This attribute is rewritable. Default accessor to this attribute is provided.
 
-=item C<< isa : ArrayRef|HashRef >>
+=item C<isa : ArrayRef|HashRef>
 
-=item C<< required : 1 >>
+=item C<required : 1>
 
 This attribute must be set by constructor.
 
 =back
 
-=head3 C<< y >>
+=head3 C<y>
 
 The another target of signal one side to calculate PSNR or MSE.
 
-=over
+=over 4
 
-=item C<< is : rw >>
+=item C<is : rw>
 
 This attribute is rewritable. Default accessor to this attribute is provided.
 
-=item C<< isa : ArrayRef|HashRef >>
+=item C<isa : ArrayRef|HashRef>
 
-=item C<< required : 1 >>
+=item C<required : 1>
 
 This attribute must be set by constructor.
 
 =back
 
-
 =head1 METHODS
 
-=over
+=over 4
 
-=item C<< mse >>
+=item C<mse>
 
 This function calculates and returns MSE of single component signal. This function requires attribute I<x> and I<y> are numerical array reference.
 Signal length of I<x> and I<y> must be the same.
 
-=item C<< psnr >>
+=item C<psnr>
 
 This function calculates and returns PSNR of single component signal. This function requires attribute I<x> and I<y> are numerical array reference.
 Signal length of I<x> and I<y> must be the same.
 
-=item C<< mse_rgb >>
+=item C<mse_rgb>
 
 This function calculates and returns MSE of three components signal. This function requires attribute I<x> and I<y> are
 hash reference that have three component (keys of hash reference are 'r', 'g', and 'b').
 Signal length of each keys of I<x> and I<y> must be the same.
 
-=item C<< psnr_rgb >>
+=item C<psnr_rgb>
 
-This function calculates and returns PSNR of three components signal. This function requires attribute I<x> and I<y> are
+This function calculates and returns PSNRE of three components signal. This function requires attribute I<x> and I<y> are
 hash reference that have three component (keys of hash reference are 'r', 'g', and 'b').
 Signal length of each keys of I<x> and I<y> must be the same.
 
@@ -358,7 +155,7 @@ Signal length of each keys of I<x> and I<y> must be the same.
 
 =head1 DEPENDENCIES
 
-=over
+=over 4
 
 =item Mouse (version 1.02 or later)
 
@@ -372,7 +169,6 @@ Signal length of each keys of I<x> and I<y> must be the same.
 
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
 
 No bugs have been reported.
@@ -381,11 +177,9 @@ Please report any bugs or feature requests to
 C<bug-math-psnr@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
-
 =head1 AUTHOR
 
 moznion  C<< <moznion@gmail.com> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
@@ -393,7 +187,6 @@ Copyright (c) 2012, moznion C<< <moznion@gmail.com> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
@@ -417,3 +210,4 @@ RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
 FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
+
