@@ -8,7 +8,7 @@ use FindBin;
 use lib ("$FindBin::Bin/../lib");
 use Math::PSNR;
 
-my $psnr = new Math::PSNR(
+my $psnr = Math::PSNR->new(
     {
         bpp => 8,
         x   => [ 1, 2, 3, 4 ],
@@ -20,7 +20,7 @@ my $psnr = new Math::PSNR(
 #
 # x = [ 1, 2, 3, 4 ]
 # y = [ 1, 2, 3, 4 ]
-say $psnr->mse;
+print $psnr->mse . "\n";
 
 # Calculate MSE between following lists.
 #
@@ -28,4 +28,4 @@ say $psnr->mse;
 # y = [ 9.9, 8.8, 7.7, 6.6, 5.5 ]
 $psnr->x( [ 1.1, 2.2, 3.3, 4.4, 5.5 ] );
 $psnr->y( [ 9.9, 8.8, 7.7, 6.6, 5.5 ] );
-say $psnr->mse;
+print $psnr->mse . "\n";

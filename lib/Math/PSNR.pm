@@ -9,66 +9,186 @@ use Mouse;
 our $VERSION = '0.01';
 
 has bpp => (
-    is       => 'rw',
-    isa      => 'Int',
-    default  => '8',
+    is      => 'rw',
+    isa     => 'Int',
+    default => '8',
+    trigger => sub {
+        my ($self) = @_;
+        $self->_set_max_power( $self->_calc_max_power );
+    },
 );
 
 has x => (
     is       => 'rw',
-    isa      => 'ArrayRef',
+    isa      => 'ArrayRef|HashRef',
     required => '1',
 );
 
 has y => (
     is       => 'rw',
-    isa      => 'ArrayRef',
+    isa      => 'ArrayRef|HashRef',
     required => '1',
+);
+
+has max_power => (
+    is       => 'ro',
+    isa      => 'Int',
+    writer   => '_set_max_power',
+    init_arg => undef,
+    lazy     => '1',
+    default  => sub {
+        my ($self) = @_;
+        return $self->_calc_max_power;
+    },
 );
 
 sub _sqr {
     my $var = shift;
-
     return $var * $var;
 }
 
 sub _log10 {
     my $var = shift;
-
     return log($var) / log(10);
 }
 
-sub _get_max_power {
+sub _calc_max_power {
     my $self = shift;
-
     return 2**$self->bpp - 1;
+}
+
+sub _limit {
+    my ($self, $var) = @_;
+
+    if ($var < 0) {
+        return 0;
+    } elsif ($var > $self->max_power) {
+        return $self->max_power;
+    }
+    return $var;
+}
+
+sub _square_remainder {
+    my ( $self, $x, $y ) = @_;
+
+    $x = $self->_limit($x);
+    $y = $self->_limit($y);
+
+    return _sqr( $x - $y );
+}
+
+sub _calc_psnr {
+    my ( $self, $mse ) = @_;
+    return 20 * _log10( $self->max_power / sqrt($mse) );
+}
+
+sub _check_exist_key {
+    my ($self, $key) = @_;
+
+    unless ( exists $self->x->{$key} && exists $self->y->{$key} ) {
+        croak "Signal hash must have key of '$key'.";
+    }
+
+    unless ( ref $self->x->{$key} eq 'ARRAY'
+        && ref $self->y->{$key} eq 'ARRAY' )
+    {
+        croak "Value of '$key' must be array reference. ";
+    }
+}
+
+sub _check_exist_rgb_keys {
+    my ($self) = @_;
+
+    $self->_check_exist_key('r');
+    $self->_check_exist_key('g');
+    $self->_check_exist_key('b');
+}
+
+sub _check_signal_length_each {
+    my ($self) = @_;
+
+    my $signal_length_x = $#{ $self->x->{'r'} };
+    unless ( $signal_length_x == $#{ $self->x->{'g'} } && $signal_length_x == $#{ $self->x->{'b'} } ) {
+        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal x.";
+    }
+
+    my $signal_length_y = $#{ $self->y->{'r'} };
+    unless ( $signal_length_y == $#{ $self->y->{'g'} } && $signal_length_y == $#{ $self->y->{'b'} } ) {
+        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal y.";
+    }
+
+    unless ( $signal_length_x == $signal_length_y ) {
+        croak "Signal length are different between 'Signal x' and 'Signal y'.";
+    }
 }
 
 sub mse {
     my ($self) = @_;
 
-    unless ( $#{ $self->x } == $#{ $self->y } ) {
-        croak "Length of given signals are different.";
+    unless ( ref $self->x eq 'ARRAY' && ref $self->y eq 'ARRAY') {
+        croak 'Signals must be array reference.';
     }
 
-    my $sum = 0;
-    $sum += _sqr( $self->x->[$_] - $self->y->[$_] ) for ( 0 .. $#{ $self->x } );
+    my $signal_length = scalar @{ $self->x };
+    unless ( $signal_length == scalar @{ $self->y } ) {
+        croak 'Signals must be the same length.';
+    }
 
-    return $sum / scalar @{ $self->x };
+    my ( $x, $y ) = ( $self->x, $self->y );
+    my $sum = 0;
+    for ( 0 .. $signal_length - 1 ) {
+        $sum += $self->_square_remainder( $x->[$_], $y->[$_] );
+    }
+
+    return $sum / $signal_length;
 }
 
 sub psnr {
-    my ( $self ) = @_;
+    my ($self) = @_;
 
     my $mse = $self->mse;
-    if ($mse == 0) {
+    if ( $mse == 0 ) {
         carp 'Given signals are the same.';
         return 'same';
     }
 
-    my $max_power = $self->_get_max_power;
+    return $self->_calc_psnr($mse);
+}
 
-    return 20 * _log10( $max_power / sqrt($mse) );
+sub mse_rgb {
+    my ($self) = @_;
+
+    unless ( ref $self->x eq 'HASH' && ref $self->y eq 'HASH' ) {
+        croak 'Signals must be hash refference.';
+    }
+
+    $self->_check_exist_rgb_keys;
+    $self->_check_signal_length_each;
+
+    my $signal_length = scalar @{ $self->x->{'r'} };
+
+    my ( $x, $y ) = ( $self->x, $self->y );
+    my $sum = 0;
+    for ( 0 .. $signal_length - 1 ) {
+        $sum +=
+          $self->_square_remainder( $x->{'r'}->[$_], $y->{'r'}->[$_] ) +
+          $self->_square_remainder( $x->{'g'}->[$_], $y->{'g'}->[$_] ) +
+          $self->_square_remainder( $x->{'b'}->[$_], $y->{'b'}->[$_] );
+    }
+    return $sum / (3 * $signal_length);
+}
+
+sub psnr_rgb {
+    my ($self) = @_;
+
+    my $mse = $self->mse_rgb;
+
+    if ( $mse == 0 ) {
+        carp 'Given signals are the same.';
+        return 'same';
+    }
+
+    return $self->_calc_psnr($mse);
 }
 
 1;

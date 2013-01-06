@@ -11,7 +11,7 @@ BEGIN {
 }
 
 my ( $expect, $got, $list1, $list2 );
-my $psnr = new Math::PSNR(
+my $psnr = Math::PSNR->new(
     {
         bpp => 8,
         x   => [ 1.1, 2.2, 3.3, 4.4, 5.5 ],
@@ -19,7 +19,7 @@ my $psnr = new Math::PSNR(
     }
 );
 
-subtest 'Calc PSNR - 1' => sub {
+subtest 'Calc PSNR between the different signals' => sub {
     $expect = 33.50083748;
     $got    = $psnr->psnr;
     is( sprintf( "%.7f", $got ), sprintf( "%.7f", $expect ) );
