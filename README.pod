@@ -167,7 +167,7 @@ Math::PSNR requires no configuration files or environment variables.
 
 =over 4
 
-=item Mouse (version 1.02 or later)
+=item Moo (version 1.000007 or later)
 
 =item Test::Exception (version 0.31 or later)
 

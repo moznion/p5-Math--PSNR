@@ -4,14 +4,16 @@ use warnings;
 use strict;
 use Carp;
 use Exporter;
-use Mouse;
+use Moo;
 
 our $VERSION = '0.01';
 
 has bpp => (
     is      => 'rw',
-    isa     => 'Int',
-    default => '8',
+    isa     => sub {
+        croak "'$_[0]' is not an integer. bpp must be an integer." unless $_[0] =~ /\d+\z/;
+    },
+    default => sub { return 8 },
     trigger => sub {
         my ($self) = @_;
         $self->_set_max_power( $self->_calc_max_power );
@@ -20,19 +22,25 @@ has bpp => (
 
 has x => (
     is       => 'rw',
-    isa      => 'ArrayRef|HashRef',
+    isa      => sub {
+        die "x must be array reference or hash reference." unless (ref $_[0] eq 'ARRAY' || ref $_[0] eq 'HASH');
+    },
     required => '1',
 );
 
 has y => (
     is       => 'rw',
-    isa      => 'ArrayRef|HashRef',
+    isa      => sub {
+        die "y must be array reference or hash reference." unless (ref $_[0] eq 'ARRAY' || ref $_[0] eq 'HASH');
+    },
     required => '1',
 );
 
 has max_power => (
     is       => 'ro',
-    isa      => 'Int',
+    isa      => sub {
+        die "'$_[0]' is not an integer. max_power must be an integer." unless $_[0] =~ /\d+\z/;
+    },
     writer   => '_set_max_power',
     init_arg => undef,
     lazy     => '1',
@@ -42,7 +50,7 @@ has max_power => (
     },
 );
 
-no Mouse;
+no Moo;
 
 sub _sqr {
     my $var = shift;
@@ -372,7 +380,7 @@ Math::PSNR requires no configuration files or environment variables.
 
 =over
 
-=item Mouse (version 1.02 or later)
+=item Moo (version 1.000007 or later)
 
 =item Test::Exception (version 0.31 or later)
 
