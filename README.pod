@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Math::PSNR - Calculate the PSNR (Peak Signal-to-Noise Ratio) and MSE (Mean Square Error).
+Math::PSNR - Calculate PSNR (Peak Signal-to-Noise Ratio) and MSE (Mean Square Error).
 
 =head1 VERSION
 
@@ -55,7 +55,7 @@ This document describes Math::PSNR version 0.01
 This module calculates PSNR (Peak Signal-to-Noise Ration) and MSE (Mean Square Error).
 
 PSNR and MSE are the index of measuring quality between different signals.
-They are commonly used to evaluate quality of image.
+They are commonly used to evaluate quality of images.
 
 This module can deal with single component signals (e.g. monochrome image) and
 three components signals (e.g. color (RGB) image).
@@ -68,7 +68,7 @@ Creates a instance. Attributes are as follows:
 
 =head3 C<bpp>
 
-Specify the bpp (bit per pixel). It set I<2^(bpp) - 1> to maximum power (maximum power means maximum allowable value of signal).
+Specify the bpp (bit per pixel). It sets I<2^(bpp) - 1> to maximum power ("maximum power" means maximum allowable value of signal).
 
 =over 4
 
@@ -82,7 +82,7 @@ Please specify value of this attribute as integer.
 
 =item C<default : 8>
 
-This attribute has default value. If I<bpp> is not set, it will be set 8 (bit).
+This attribute has default value. If I<bpp> is not specified, it will be set 8 (bit).
 
 =item C<required : 0>
 
@@ -92,7 +92,7 @@ You do not have to set value of this attribute at constructor.
 
 =head3 C<x>
 
-The target of signal one side to calculate PSNR and MSE.
+One side of signal for calculate PSNR and MSE.
 
 =over 4
 
@@ -112,7 +112,7 @@ You must set value of this attribute at constructor.
 
 =head3 C<y>
 
-The target of signal another side to calculate PSNR or MSE.
+Another signal for calculate PSNR or MSE.
 
 =over 4
 
@@ -136,25 +136,22 @@ You must set value of this attribute at constructor.
 
 =item C<mse>
 
-This function calculates and returns MSE of single component signal. This function requires values of attribute I<x> and attribute I<y> those are numerical array reference.
+This function calculates and returns MSE of single component signal. This function requires values of attribute I<x> and I<y> that is numerical array reference.
 Signal (array) length of I<x> and I<y> must be the same.
 
 =item C<psnr>
 
-This function calculates and returns PSNR of single component signal. This function requires values of attribute I<x> and attribute I<y> those are numerical array reference.
+This function calculates and returns PSNR of single component signal. This function requires values of attribute I<x> and I<y> that is numerical array reference.
 Signal (array) length of I<x> and I<y> must be the same.
 
 =item C<mse_rgb>
 
-This function calculates and returns MSE of three components (RGB) signal. This function requires values of attribute I<x> and attribute I<y> those are
-hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
+This function calculates and returns MSE of three components (RGB) signal. This function requires values of attribute I<x> and I<y> that is hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
 Signal length of each components (keys) of I<x> and I<y> must be the same.
 
 =item C<psnr_rgb>
 
-This function calculates and returns PSNR of three components signal. This function requires attribute I<x> and I<y> are
-This function calculates and returns PSNR of three components signal. This function requires values of attribute I<x> and attribute I<y> those are
-hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
+This function calculates and returns PSNR of three components signal. This function requires values of attribute I<x> and I<y> that is hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
 Signal length of each components (keys) of I<x> and I<y> must be the same.
 
 =back
