@@ -74,14 +74,14 @@ subtest 'Calc MSE (RGB) the different hash' => sub {
 subtest 'Give array as signal x' => sub {
     $psnr->x( [ 1.1, 2.2, 3.3, 4.4, 5.5 ] );
     dies_ok { $psnr->mse_rgb } 'Die cause of giving array to x';
-    throws_ok { $psnr->mse_rgb } qr/Signals must be hash refference\./;
+    throws_ok { $psnr->mse_rgb } qr/Signals must be hash reference\./;
     _tear_down;
 };
 
 subtest 'Give array as signal y' => sub {
     $psnr->y( [ 1.1, 2.2, 3.3, 4.4, 5.5 ] );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signals must be hash refference\./;
+    throws_ok { $psnr->mse_rgb } qr/Signals must be hash reference\./;
     _tear_down;
 };
 
@@ -242,7 +242,7 @@ subtest 'Incomplete hash about signal x' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'r'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'r'\./;
 
     $psnr->x(
         {
@@ -251,7 +251,7 @@ subtest 'Incomplete hash about signal x' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'g'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'g'\./;
 
     $psnr->x(
         {
@@ -260,7 +260,7 @@ subtest 'Incomplete hash about signal x' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'b'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'b'\./;
 
     _tear_down;
 };
@@ -273,7 +273,7 @@ subtest 'Incomplete hash about signal y' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'r'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'r'\./;
 
     $psnr->y(
         {
@@ -282,7 +282,7 @@ subtest 'Incomplete hash about signal y' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'g'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'g'\./;
 
     $psnr->y(
         {
@@ -291,7 +291,7 @@ subtest 'Incomplete hash about signal y' => sub {
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Signal hash must have key of 'b'\./;
+    throws_ok { $psnr->mse_rgb } qr/Hash of signal must have key of 'b'\./;
 
     _tear_down;
 };

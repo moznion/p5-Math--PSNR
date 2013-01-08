@@ -88,7 +88,7 @@ sub _check_exist_key {
     my ($self, $key) = @_;
 
     unless ( exists $self->x->{$key} && exists $self->y->{$key} ) {
-        croak "Signal hash must have key of '$key'.";
+        croak "Hash of signal must have key of '$key'.";
     }
 
     unless ( ref $self->x->{$key} eq 'ARRAY'
@@ -161,7 +161,7 @@ sub mse_rgb {
     my ($self) = @_;
 
     unless ( ref $self->x eq 'HASH' && ref $self->y eq 'HASH' ) {
-        croak 'Signals must be hash refference.';
+        croak 'Signals must be hash reference.';
     }
 
     $self->_check_exist_rgb_keys;
@@ -226,6 +226,7 @@ This document describes Math::PSNR version 0.01
     # Calculate PSNR
     $psnr->psnr;
 
+    # Access to member variable of x
     $psnr->x(
         {
             r => [ 1.1, 2.2, 3.3, 4.4, 5.5 ],
@@ -233,6 +234,8 @@ This document describes Math::PSNR version 0.01
             b => [ 1.1, 2.2, 3.3, 4.4, 5.5 ],
         }
     );
+
+    # Access to member variable of y
     $psnr->y(
         {
             r => [ 9.9, 8.8, 7.7, 6.6, 5.5 ],
@@ -241,10 +244,10 @@ This document describes Math::PSNR version 0.01
         }
     );
 
-    # Calculate MSE of RGB signal
+    # Calculate MSE of three components signal (e.g. RGB image)
     $psnr->msr_rgb;
 
-    # Calculate PSNR of RGB signal
+    # Calculate PSNR of three components signal (e.g. RGB image)
     $psnr->psnr_rgb;
 
 
@@ -255,12 +258,8 @@ This module calculates PSNR (Peak Signal-to-Noise Ration) and MSE (Mean Square E
 PSNR and MSE are the index of measuring quality between different signals.
 They are commonly used to evaluate quality of image.
 
-This module can deal with single component signal (e.g. monochrome image) and
-three components signal (e.g. color (RGB) image).
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-Math::PSNR requires no configuration files or environment variables.
+This module can deal with single component signals (e.g. monochrome image) and
+three components signals (e.g. color (RGB) image).
 
 
 =head1 INTERFACES
@@ -271,7 +270,7 @@ Creates a instance. Attributes are as follows:
 
 =head3 C<< bpp >>
 
-Specify the bpp (bit per pixel). It set I<2^(bpp) - 1> to maximum power.
+Specify the bpp (bit per pixel). It set I<2^(bpp) - 1> to maximum power (maximum power means maximum allowable value of signal).
 
 =over
 
@@ -281,19 +280,21 @@ This attribute is rewritable. Default accessor to this attribute is provided.
 
 =item C<< isa : Int >>
 
+Please specify value of this attribute as integer.
+
 =item C<< default : 8 >>
 
 This attribute has default value. If I<bpp> is not set, it will be set 8 (bit).
 
 =item C<< required : 0 >>
 
-This attribute is not required.
+You do not have to set value of this attribute at constructor.
 
 =back
 
 =head3 C<< x >>
 
-The target of signal one side to calculate PSNR or MSE.
+The target of signal one side to calculate PSNR and MSE.
 
 =over
 
@@ -303,15 +304,17 @@ This attribute is rewritable. Default accessor to this attribute is provided.
 
 =item C<< isa : ArrayRef|HashRef >>
 
+Please specify value of this attribute as numerical array reference or hash reference.
+
 =item C<< required : 1 >>
 
-This attribute must be set by constructor.
+You must set value of this attribute at constructor.
 
 =back
 
 =head3 C<< y >>
 
-The another target of signal one side to calculate PSNR or MSE.
+The target of signal another side to calculate PSNR or MSE.
 
 =over
 
@@ -321,9 +324,11 @@ This attribute is rewritable. Default accessor to this attribute is provided.
 
 =item C<< isa : ArrayRef|HashRef >>
 
+Please specify value of this attribute as numerical array reference or hash reference.
+
 =item C<< required : 1 >>
 
-This attribute must be set by constructor.
+You must set value of this attribute at constructor.
 
 =back
 
@@ -334,27 +339,34 @@ This attribute must be set by constructor.
 
 =item C<< mse >>
 
-This function calculates and returns MSE of single component signal. This function requires attribute I<x> and I<y> are numerical array reference.
-Signal length of I<x> and I<y> must be the same.
+This function calculates and returns MSE of single component signal. This function requires values of attribute I<x> and attribute I<y> those are numerical array reference.
+Signal (array) length of I<x> and I<y> must be the same.
 
 =item C<< psnr >>
 
-This function calculates and returns PSNR of single component signal. This function requires attribute I<x> and I<y> are numerical array reference.
-Signal length of I<x> and I<y> must be the same.
+This function calculates and returns PSNR of single component signal. This function requires values of attribute I<x> and attribute I<y> those are numerical array reference.
+Signal (array) length of I<x> and I<y> must be the same.
 
 =item C<< mse_rgb >>
 
-This function calculates and returns MSE of three components signal. This function requires attribute I<x> and I<y> are
-hash reference that have three component (keys of hash reference are 'r', 'g', and 'b').
-Signal length of each keys of I<x> and I<y> must be the same.
+This function calculates and returns MSE of three components (RGB) signal. This function requires values of attribute I<x> and attribute I<y> those are
+hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
+Signal length of each components (keys) of I<x> and I<y> must be the same.
 
 =item C<< psnr_rgb >>
 
 This function calculates and returns PSNR of three components signal. This function requires attribute I<x> and I<y> are
-hash reference that have three component (keys of hash reference are 'r', 'g', and 'b').
-Signal length of each keys of I<x> and I<y> must be the same.
+This function calculates and returns PSNR of three components signal. This function requires values of attribute I<x> and attribute I<y> those are
+hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
+Signal length of each components (keys) of I<x> and I<y> must be the same.
 
 =back
+
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+Math::PSNR requires no configuration files or environment variables.
+
 
 =head1 DEPENDENCIES
 
