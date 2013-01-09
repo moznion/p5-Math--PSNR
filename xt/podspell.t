@@ -18,6 +18,7 @@ MSE
 PSNR
 RGB
 bpp
+GitHub
 rewritable
 MERCHANTABILITY
 moznion
