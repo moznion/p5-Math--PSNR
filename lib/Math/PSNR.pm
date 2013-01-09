@@ -3,7 +3,6 @@ package Math::PSNR;
 use warnings;
 use strict;
 use Carp;
-use Exporter;
 use Mouse;
 
 our $VERSION = '0.01';
