@@ -14,7 +14,7 @@ my $img = Imager->new;
 $img->read( file => "$FindBin::Bin/comp_barb.jpg" ) or die $img->errstr;
 
 my $orig_img = Imager->new;
-$orig_img->read( file => "$FindBin::Bin/orig_barb.png" ) or die $orig_img->errstr;
+$orig_img->read( file => "$FindBin::Bin/orig_barb.jpg" ) or die $orig_img->errstr;
 
 my $width  = $img->getwidth;
 my $height = $img->getheight;
