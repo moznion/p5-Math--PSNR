@@ -260,6 +260,8 @@ They are commonly used to evaluate quality of images.
 This module can deal with single component signals (e.g. monochrome image) and
 three components signals (e.g. color (RGB) image).
 
+More examples are in my GitHub repository. L<< https://github.com/moznion/p5-Math--PSNR >>
+
 
 =head1 INTERFACES
 
