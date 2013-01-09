@@ -93,7 +93,7 @@ sub _check_exist_key {
     unless ( ref $self->x->{$key} eq 'ARRAY'
         && ref $self->y->{$key} eq 'ARRAY' )
     {
-        croak "Value of '$key' must be array reference. ";
+        croak "Value of '$key' must be numerical array reference. ";
     }
 }
 
@@ -137,8 +137,8 @@ sub mse {
 
     my ( $x, $y ) = ( $self->x, $self->y );
     my $sum = 0;
-    for ( 0 .. $signal_length - 1 ) {
-        $sum += $self->_square_remainder( $x->[$_], $y->[$_] );
+    for my $i ( 0 .. $signal_length - 1 ) {
+        $sum += $self->_square_remainder( $x->[$i], $y->[$i] );
     }
 
     return $sum / $signal_length;
@@ -170,11 +170,11 @@ sub mse_rgb {
 
     my ( $x, $y ) = ( $self->x, $self->y );
     my $sum = 0;
-    for ( 0 .. $signal_length - 1 ) {
+    for my $i ( 0 .. $signal_length - 1 ) {
         $sum +=
-          $self->_square_remainder( $x->{'r'}->[$_], $y->{'r'}->[$_] ) +
-          $self->_square_remainder( $x->{'g'}->[$_], $y->{'g'}->[$_] ) +
-          $self->_square_remainder( $x->{'b'}->[$_], $y->{'b'}->[$_] );
+          $self->_square_remainder( $x->{'r'}->[$i], $y->{'r'}->[$i] ) +
+          $self->_square_remainder( $x->{'g'}->[$i], $y->{'g'}->[$i] ) +
+          $self->_square_remainder( $x->{'b'}->[$i], $y->{'b'}->[$i] );
     }
     return $sum / (3 * $signal_length);
 }

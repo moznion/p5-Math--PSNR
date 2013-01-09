@@ -127,7 +127,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'r' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'r' must be numerical array reference\./;
 
     $psnr->x(
         {
@@ -137,7 +137,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'g' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'g' must be numerical array reference\./;
 
     $psnr->x(
         {
@@ -147,7 +147,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'b' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'b' must be numerical array reference\./;
 
     _tear_down;
 };
@@ -194,7 +194,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'r' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'r' must be numerical array reference\./;
 
     $psnr->y(
         {
@@ -204,7 +204,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'g' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'g' must be numerical array reference\./;
 
     $psnr->y(
         {
@@ -214,7 +214,7 @@ qr/Each elements of signal must be the same length\. Please check out the length
         }
     );
     dies_ok { $psnr->mse_rgb };
-    throws_ok { $psnr->mse_rgb } qr/Value of 'b' must be array reference\./;
+    throws_ok { $psnr->mse_rgb } qr/Value of 'b' must be numerical array reference\./;
 
     _tear_down;
 };
