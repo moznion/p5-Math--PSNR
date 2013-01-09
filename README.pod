@@ -64,11 +64,11 @@ three components signals (e.g. color (RGB) image).
 
 =head2 C<< Math::PSNR->new( bpp => $bpp, x => $x, y => $y ) >>
 
-Creates a instance. Attributes are as follows:
+Creates an instance. Attributes are as follows:
 
 =head3 C<bpp>
 
-Specify the bpp (bit per pixel). It sets I<2^(bpp) - 1> to maximum power ("maximum power" means maximum allowable value of signal).
+Specify the bpp (bit per pixel). It sets B<2^(bpp) - 1> to maximum power ("maximum power" means maximum allowable value of signal).
 
 =over 4
 
