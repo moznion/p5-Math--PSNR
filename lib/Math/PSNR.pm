@@ -2,6 +2,7 @@ package Math::PSNR;
 
 use warnings;
 use strict;
+use utf8;
 use Carp;
 use Mouse;
 
@@ -12,7 +13,7 @@ has bpp => (
     isa     => 'Int',
     default => '8',
     trigger => sub {
-        my ($self) = @_;
+        my $self = shift;
         $self->_set_max_power( $self->_calc_max_power );
     },
 );
@@ -21,12 +22,20 @@ has x => (
     is       => 'rw',
     isa      => 'ArrayRef|HashRef',
     required => '1',
+    trigger  => sub {
+        my $self = shift;
+        $self->_reset_cache;
+    },
 );
 
 has y => (
     is       => 'rw',
     isa      => 'ArrayRef|HashRef',
     required => '1',
+    trigger  => sub {
+        my $self = shift;
+        $self->_reset_cache;
+    },
 );
 
 has max_power => (
@@ -36,12 +45,38 @@ has max_power => (
     init_arg => undef,
     lazy     => '1',
     default  => sub {
-        my ($self) = @_;
+        my $self = shift;
         return $self->_calc_max_power;
+    },
+    trigger  => sub {
+        my $self = shift;
+        $self->_reset_cache;
     },
 );
 
+has mse_cache => (
+    is       => 'ro',
+    isa      => 'Num|Undef',
+    writer   => '_set_mse_cache',
+    init_arg => undef,
+    default  => undef,
+);
+
+has psnr_cache => (
+    is       => 'ro',
+    isa      => 'Num|Undef',
+    writer   => '_set_psnr_cache',
+    init_arg => undef,
+    default  => undef,
+);
+
 no Mouse;
+
+sub _reset_cache {
+    my $self = shift;
+    $self->_set_mse_cache(undef);
+    $self->_set_psnr_cache(undef);
+}
 
 sub _sqr {
     my $var = shift;
@@ -59,11 +94,12 @@ sub _calc_max_power {
 }
 
 sub _limit {
-    my ($self, $var) = @_;
+    my ( $self, $var ) = @_;
 
-    if ($var < 0) {
+    if ( $var < 0 ) {
         return 0;
-    } elsif ($var > $self->max_power) {
+    }
+    elsif ( $var > $self->max_power ) {
         return $self->max_power;
     }
     return $var;
@@ -84,7 +120,7 @@ sub _calc_psnr {
 }
 
 sub _check_exist_key {
-    my ($self, $key) = @_;
+    my ( $self, $key ) = @_;
 
     unless ( exists $self->x->{$key} && exists $self->y->{$key} ) {
         croak "Hash of signal must have key of '$key'.";
@@ -98,7 +134,7 @@ sub _check_exist_key {
 }
 
 sub _check_exist_rgb_keys {
-    my ($self) = @_;
+    my $self = shift;
 
     $self->_check_exist_key('r');
     $self->_check_exist_key('g');
@@ -106,16 +142,22 @@ sub _check_exist_rgb_keys {
 }
 
 sub _check_signal_length_each {
-    my ($self) = @_;
+    my $self = shift;
 
     my $signal_length_x = $#{ $self->x->{'r'} };
-    unless ( $signal_length_x == $#{ $self->x->{'g'} } && $signal_length_x == $#{ $self->x->{'b'} } ) {
-        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal x.";
+    unless ( $signal_length_x == $#{ $self->x->{'g'} }
+        && $signal_length_x == $#{ $self->x->{'b'} } )
+    {
+        croak
+"Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal x.";
     }
 
     my $signal_length_y = $#{ $self->y->{'r'} };
-    unless ( $signal_length_y == $#{ $self->y->{'g'} } && $signal_length_y == $#{ $self->y->{'b'} } ) {
-        croak "Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal y.";
+    unless ( $signal_length_y == $#{ $self->y->{'g'} }
+        && $signal_length_y == $#{ $self->y->{'b'} } )
+    {
+        croak
+"Each elements of signal must be the same length. Please check out the length of 'r', 'g', and 'b' of signal y.";
     }
 
     unless ( $signal_length_x == $signal_length_y ) {
@@ -124,9 +166,11 @@ sub _check_signal_length_each {
 }
 
 sub mse {
-    my ($self) = @_;
+    my $self = shift;
 
-    unless ( ref $self->x eq 'ARRAY' && ref $self->y eq 'ARRAY') {
+    return $self->mse_cache if defined( $self->mse_cache );    # Enable Cache
+
+    unless ( ref $self->x eq 'ARRAY' && ref $self->y eq 'ARRAY' ) {
         croak 'Signals must be array reference.';
     }
 
@@ -141,23 +185,33 @@ sub mse {
         $sum += $self->_square_remainder( $x->[$i], $y->[$i] );
     }
 
-    return $sum / $signal_length;
+    my $mse = $sum / $signal_length;
+
+    $self->_set_mse_cache($mse);
+    return $mse;
 }
 
 sub psnr {
-    my ($self) = @_;
+    my $self = shift;
 
-    my $mse = $self->mse;
+    return $self->psnr_cache if defined( $self->psnr_cache );    # Enable Cache
+
+    my $mse = defined( $self->mse_cache ) ? $self->mse_cache : $self->mse;
     if ( $mse == 0 ) {
         carp 'Given signals are the same.';
         return 'same';
     }
 
-    return $self->_calc_psnr($mse);
+    my $psnr = $self->_calc_psnr($mse);
+
+    $self->_set_psnr_cache($psnr);
+    return $psnr;
 }
 
 sub mse_rgb {
-    my ($self) = @_;
+    my $self = shift;
+
+    return $self->mse_cache if defined( $self->mse_cache );    # Enable Cache
 
     unless ( ref $self->x eq 'HASH' && ref $self->y eq 'HASH' ) {
         croak 'Signals must be hash reference.';
@@ -176,20 +230,28 @@ sub mse_rgb {
           $self->_square_remainder( $x->{'g'}->[$i], $y->{'g'}->[$i] ) +
           $self->_square_remainder( $x->{'b'}->[$i], $y->{'b'}->[$i] );
     }
-    return $sum / (3 * $signal_length);
+
+    my $mse = $sum / ( 3 * $signal_length );
+
+    $self->_set_mse_cache($mse);
+    return $mse;
 }
 
 sub psnr_rgb {
-    my ($self) = @_;
+    my $self = shift;
 
-    my $mse = $self->mse_rgb;
+    return $self->psnr_cache if defined( $self->psnr_cache );    # Enable Cache
 
+    my $mse = defined( $self->mse_cache ) ? $self->mse_cache : $self->mse_rgb;
     if ( $mse == 0 ) {
         carp 'Given signals are the same.';
         return 'same';
     }
 
-    return $self->_calc_psnr($mse);
+    my $psnr = $self->_calc_psnr($mse);
+
+    $self->_set_psnr_cache($psnr);
+    return $psnr;
 }
 
 1;
