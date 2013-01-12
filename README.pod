@@ -141,20 +141,29 @@ You must set value of this attribute at constructor.
 This function calculates and returns MSE of single component signal. This function requires values of attribute I<x> and I<y> that is numerical array reference.
 Signal (array) length of I<x> and I<y> must be the same.
 
+This function can use cache. If instance is immutable, this function returns previous calculated result.
+
 =item C<psnr>
 
 This function calculates and returns PSNR of single component signal. This function requires values of attribute I<x> and I<y> that is numerical array reference.
 Signal (array) length of I<x> and I<y> must be the same.
+
+This function can use cache. If instance is immutable, this function returns previous calculated result.
+And this function uses cache of MSE if it is available.
 
 =item C<mse_rgb>
 
 This function calculates and returns MSE of three components (RGB) signal. This function requires values of attribute I<x> and I<y> that is hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
 Signal length of each components (keys) of I<x> and I<y> must be the same.
 
+This function can use cache like above-functions.
+
 =item C<psnr_rgb>
 
 This function calculates and returns PSNR of three components signal. This function requires values of attribute I<x> and I<y> that is hash reference. Those hash references must have three components (keys of hash are 'r', 'g', and 'b').
 Signal length of each components (keys) of I<x> and I<y> must be the same.
+
+This function can use cache like above-functions.
 
 =back
 
