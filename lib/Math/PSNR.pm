@@ -6,7 +6,7 @@ use utf8;
 use Carp;
 use Mouse;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 has bpp => (
     is      => 'rw',
@@ -266,7 +266,7 @@ Math::PSNR - Calculate PSNR (Peak Signal-to-Noise Ratio) and MSE (Mean Square Er
 
 =head1 VERSION
 
-This document describes Math::PSNR version 0.01
+This document describes Math::PSNR version 0.02
 
 
 =head1 SYNOPSIS

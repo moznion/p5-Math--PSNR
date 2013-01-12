@@ -8,8 +8,11 @@ example/orig_barb.jpg
 example/psnr.pl
 example/psnr_rgb.pl
 lib/Math/PSNR.pm
+LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
+META.yml
 README
 README.pod
 t/00.load.t
@@ -24,6 +27,3 @@ xt/pod.t
 xt/podspell.t
 xt/synopsis.t
 xt/vars.t
-LICENSE
-META.yml
-META.json
