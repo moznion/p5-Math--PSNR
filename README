@@ -3,7 +3,7 @@ NAME
     Square Error).
 
 VERSION
-    This document describes Math::PSNR version 0.01
+    This document describes Math::PSNR version 0.02
 
 SYNOPSIS
         use Math::PSNR;
@@ -116,11 +116,18 @@ METHODS
         numerical array reference. Signal (array) length of *x* and *y* must
         be the same.
 
+        This function can use cache. If instance is immutable, this function
+        returns previous calculated result.
+
     "psnr"
         This function calculates and returns PSNR of single component
         signal. This function requires values of attribute *x* and *y* that
         is numerical array reference. Signal (array) length of *x* and *y*
         must be the same.
+
+        This function can use cache. If instance is immutable, this function
+        returns previous calculated result. And this function uses cache of
+        MSE if it is available.
 
     "mse_rgb"
         This function calculates and returns MSE of three components (RGB)
@@ -129,12 +136,16 @@ METHODS
         (keys of hash are 'r', 'g', and 'b'). Signal length of each
         components (keys) of *x* and *y* must be the same.
 
+        This function can use cache like above-functions.
+
     "psnr_rgb"
         This function calculates and returns PSNR of three components
         signal. This function requires values of attribute *x* and *y* that
         is hash reference. Those hash references must have three components
         (keys of hash are 'r', 'g', and 'b'). Signal length of each
         components (keys) of *x* and *y* must be the same.
+
+        This function can use cache like above-functions.
 
 CONFIGURATION AND ENVIRONMENT
     Math::PSNR requires no configuration files or environment variables.
